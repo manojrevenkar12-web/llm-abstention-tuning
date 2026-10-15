@@ -1,0 +1,11 @@
+# Exact versions the pipeline was tested with. torch is left to the platform (Colab ships its own CUDA build).
+transformers==5.19.0
+trl==1.15.0
+peft==0.21.2
+datasets==5.1.0
+accelerate==1.15.0
+numpy>=1.26
+pydantic>=2.6
+pyyaml>=6.0
+matplotlib>=3.8
+pytest>=8.0

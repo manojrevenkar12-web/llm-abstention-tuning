@@ -1,0 +1,31 @@
+# Smaller variant of the main experiment for a free Colab T4 (same method, fewer questions).
+run_name: qwen2.5-1.5b-quick
+output_dir: runs
+seed: 42
+
+model:
+  base: Qwen/Qwen2.5-1.5B-Instruct
+  precision: auto
+
+data:
+  train:   { name: triviaqa_train, source: triviaqa, split: train, limit: 3000 }
+  eval:
+    - { name: triviaqa, source: triviaqa, split: validation, limit: 500 }
+    - { name: popqa,    source: popqa,    split: test,       limit: 500 }
+    - { name: nq_open,  source: nq_open,  split: validation, limit: 500 }
+  in_distribution: triviaqa
+
+generation: { batch_size: 32, max_new_tokens: 24 }
+probe: { num_samples: 6, temperature: 0.7, top_p: 0.95, known_threshold: 0.6, unknown_threshold: 0.0 }
+build: { dpo_fraction: 0.5, partial_policy_sft: skip, known_rejects_abstain: true }
+
+train:
+  lora: { r: 16, alpha: 32, dropout: 0.05, target_modules: all-linear }
+  sft:  { epochs: 2, learning_rate: 1.0e-4, batch_size: 16, grad_accum: 1, max_length: 256, warmup_ratio: 0.05 }
+  dpo:  { epochs: 1, learning_rate: 5.0e-6, beta: 0.1, batch_size: 4, grad_accum: 4, max_length: 256,
+          warmup_ratio: 0.1, gradient_checkpointing: true }
+
+eval:
+  systems: [base, base_prompted, sft, sft_dpo]
+  probe_samples: 4
+  bootstrap: 1000

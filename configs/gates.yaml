@@ -1,0 +1,64 @@
+# Release gates — fixed before the first full run, not tuned to the results.
+# block = the run "fails"; warn = reported but does not fail.
+gates:
+  - name: SFT+DPO cuts in-distribution hallucination by >= 30%
+    system: sft_dpo
+    metric: hallucination_rate
+    kind: relative_reduction
+    compare_to: base
+    threshold: 0.30
+    dataset: in_distribution
+    severity: block
+
+  - name: Accuracy drops by at most 5 points
+    system: sft_dpo
+    metric: accuracy
+    kind: max_drop
+    compare_to: base
+    threshold: 0.05
+    dataset: in_distribution
+    severity: block
+
+  - name: Refuses at most 15% of questions the base model reliably knows
+    system: sft_dpo
+    metric: over_abstention_rate
+    kind: max
+    threshold: 0.15
+    dataset: in_distribution
+    severity: block
+
+  - name: Hallucination reduction transfers out of distribution (>= 15%)
+    system: sft_dpo
+    metric: hallucination_rate
+    kind: relative_reduction
+    compare_to: base
+    threshold: 0.15
+    dataset: ood
+    severity: warn
+
+  - name: Beats a confidence threshold on the base model at matched coverage
+    system: sft_dpo
+    metric: selective_accuracy
+    kind: min_delta
+    compare_to: matched_base
+    threshold: 0.0
+    dataset: in_distribution
+    severity: warn
+
+  - name: Beats prompting the base model to abstain (net score)
+    system: sft_dpo
+    metric: net_score
+    kind: min_delta
+    compare_to: base_prompted
+    threshold: 0.0
+    dataset: in_distribution
+    severity: warn
+
+  - name: DPO adds value over SFT alone (net score)
+    system: sft_dpo
+    metric: net_score
+    kind: min_delta
+    compare_to: sft
+    threshold: 0.0
+    dataset: in_distribution
+    severity: warn

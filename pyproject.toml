@@ -1,0 +1,47 @@
+[build-system]
+requires = ["setuptools>=69", "wheel"]
+build-backend = "setuptools.build_meta"
+
+[project]
+name = "abstention-tuning"
+version = "0.1.0"
+description = "Post-training a small LLM (SFT + DPO) to abstain instead of hallucinating, with calibration and risk-coverage evaluation."
+readme = "README.md"
+requires-python = ">=3.10"
+license = { text = "MIT" }
+authors = [{ name = "Manoj Kumar Prakash" }]
+dependencies = [
+    "numpy>=1.26",
+    "pydantic>=2.6",
+    "pyyaml>=6.0",
+    "matplotlib>=3.8",
+]
+
+[project.optional-dependencies]
+train = [
+    "torch>=2.4",
+    "transformers>=5.0",
+    "trl>=1.0",
+    "peft>=0.17",
+    "datasets>=3.0",
+    "accelerate>=1.0",
+]
+dev = ["pytest>=8.0", "ruff>=0.6"]
+
+[project.scripts]
+abstention-tuning = "abstention_tuning.cli:main"
+
+[tool.setuptools.packages.find]
+where = ["src"]
+
+[tool.pytest.ini_options]
+testpaths = ["tests"]
+markers = ["slow: runs the tiny end-to-end pipeline (needs torch/transformers/trl/peft)"]
+
+[tool.ruff]
+line-length = 120
+target-version = "py310"
+
+[tool.ruff.lint]
+select = ["E", "F", "I", "B", "UP"]
+ignore = ["E402", "B905"]  # E402: matplotlib.use("Agg") must precede pyplot; B905: zip(strict=) adds noise here

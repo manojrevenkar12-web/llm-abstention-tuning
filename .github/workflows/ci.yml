@@ -1,0 +1,26 @@
+name: CI
+
+on:
+  push:
+  pull_request:
+
+jobs:
+  test:
+    runs-on: ubuntu-latest
+    timeout-minutes: 30
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.11"
+          cache: pip
+      - name: Install
+        run: |
+          python -m pip install --upgrade pip
+          pip install torch            # default wheel ships Triton, needed by TRL's fused LM head (interpreted on CPU)
+          pip install -r requirements.txt ruff
+          pip install -e .
+      - name: Lint
+        run: ruff check src tests scripts
+      - name: Unit tests + end-to-end smoke pipeline (tiny model, CPU)
+        run: pytest -q
