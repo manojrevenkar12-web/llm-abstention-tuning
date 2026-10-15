@@ -1,6 +1,8 @@
 """Command line: `abstention-tuning <stage> --config configs/qwen2.5-1.5b.yaml`.
 
 Stages: prepare, probe, build, sft, dpo, evaluate, gates, report, or `all`.
+
+Exit codes: 0 = success, 3 = a blocking release gate failed, anything else = a stage crashed.
 """
 
 from __future__ import annotations
@@ -21,6 +23,8 @@ from .pipeline import (
     stage_report,
     stage_sft,
 )
+
+GATES_FAILED = 3  # distinct from Python's exit code 1 for an uncaught exception
 
 
 def main(argv: list[str] | None = None) -> int:
@@ -55,7 +59,7 @@ def main(argv: list[str] | None = None) -> int:
         result = runners[s]()
         if s == "gates":
             gates_ok = bool(result)
-    return 0 if gates_ok else 1
+    return 0 if gates_ok else GATES_FAILED
 
 
 if __name__ == "__main__":

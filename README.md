@@ -82,7 +82,7 @@ All rates carry 95 % bootstrap confidence intervals. Out-of-distribution sets: *
 [`configs/gates.yaml`](configs/gates.yaml) was written *before* the first full run. Blocking gates: ≥ 30 % relative
 reduction in in-distribution hallucination, ≤ 5-point accuracy drop, ≤ 15 % over-abstention. Warning gates: OOD
 transfer, beating the matched-coverage threshold, beating the prompt-only baseline, DPO beating SFT.
-`abstention-tuning gates` exits non-zero on a blocking failure, the same way a CI quality gate would. Failing gates
+`abstention-tuning gates` exits with code 3 on a blocking failure, the same way a CI quality gate would. Failing gates
 are reported, not tuned away.
 
 ## Reproduce

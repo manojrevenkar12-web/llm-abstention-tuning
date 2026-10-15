@@ -41,8 +41,8 @@ def test_full_pipeline_on_tiny_model(tmp_path):
     proc = subprocess.run([sys.executable, "-m", "abstention_tuning", "all", "--config", str(cfg_path),
                            "--gates", str(ROOT / "configs/gates.yaml")], cwd=ROOT, env=env,
                           capture_output=True, text=True)
-    # exit code 1 = gates failed, which is expected for a random model; anything else is a crash
-    assert proc.returncode in (0, 1), proc.stderr[-4000:]
+    # exit code 3 = a gate failed, which is expected for a random model; anything else is a crash
+    assert proc.returncode in (0, 3), f"pipeline crashed (exit {proc.returncode}):\n{proc.stderr[-6000:]}"
 
     run = tmp_path / "runs" / "smoke"
     for rel in ["data/train.jsonl", "probe/train.jsonl", "datasets/sft.jsonl", "datasets/dpo.jsonl",
