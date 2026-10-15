@@ -73,10 +73,12 @@ class Generator:
         ]
         return self.tok(texts, return_tensors="pt", padding=True, add_special_tokens=False).to(self.device)
 
-    def _gen_kwargs(self, do_sample: bool, temperature: float | None = None, top_p: float | None = None):
+    def _gen_kwargs(self, do_sample: bool, temperature: float | None = None, top_p: float | None = None,
+                    **extra):
         from transformers import GenerationConfig
 
         gc_ = GenerationConfig(
+            **extra,
             max_new_tokens=self.max_new_tokens,
             do_sample=do_sample,
             temperature=temperature if do_sample else None,
@@ -104,8 +106,8 @@ class Generator:
         for _, chunk in _batches(list(questions), self.batch_size):
             enc = self._encode(chunk, abstain_instruction)
             with torch.inference_mode():
-                res = self.model.generate(**enc, **self._gen_kwargs(False), output_scores=True,
-                                          return_dict_in_generate=True)
+                res = self.model.generate(**enc, **self._gen_kwargs(False, output_scores=True,
+                                                                    return_dict_in_generate=True))
             gen = res.sequences[:, enc["input_ids"].shape[1]:]
             logp = self.model.compute_transition_scores(res.sequences, res.scores, normalize_logits=True)
             mask = self._valid_mask(gen)
@@ -127,8 +129,8 @@ class Generator:
         for _, chunk in _batches(list(questions), per_batch):
             enc = self._encode(chunk, abstain_instruction)
             with torch.inference_mode():
-                seqs = self.model.generate(**enc, **self._gen_kwargs(True, temperature, top_p),
-                                           num_return_sequences=n)
+                seqs = self.model.generate(**enc, **self._gen_kwargs(True, temperature, top_p,
+                                                                     num_return_sequences=n))
             gen = seqs[:, enc["input_ids"].shape[1]:]
             mask = self._valid_mask(gen)
             texts = [clean_answer(self.tok.decode(gen[i][mask[i]], skip_special_tokens=True))

@@ -113,3 +113,17 @@ def test_gate_files_parse():
     from abstention_tuning.gates import load_gates
 
     assert len(load_gates(str(ROOT / "configs/gates.yaml"))) >= 5
+
+
+# ---------------------------------------------------------------- environment preflight
+
+def test_old_torchao_is_reported_clearly(monkeypatch):
+    pytest.importorskip("packaging")
+    from importlib import metadata
+
+    from abstention_tuning.train import check_environment
+
+    real = metadata.version
+    monkeypatch.setattr(metadata, "version", lambda name: "0.10.0" if name == "torchao" else real(name))
+    with pytest.raises(RuntimeError, match="pip uninstall -y torchao"):
+        check_environment()

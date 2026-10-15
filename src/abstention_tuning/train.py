@@ -22,6 +22,26 @@ from .generation import resolve_dtype
 log = logging.getLogger(__name__)
 
 
+def check_environment() -> None:
+    """PEFT raises deep inside LoRA injection if an old torchao is installed (Colab ships one).
+
+    Nothing in this project uses torchao, so the fix is to uninstall it; say so up front.
+    """
+    from importlib import metadata
+
+    from packaging.version import Version
+
+    try:
+        version = metadata.version("torchao")
+    except metadata.PackageNotFoundError:
+        return
+    if Version(version) < Version("0.16.0"):
+        raise RuntimeError(
+            f"torchao {version} is installed and PEFT rejects versions below 0.16.0 when adding LoRA layers. "
+            "This project does not use torchao — run `pip uninstall -y torchao` and re-run this stage."
+        )
+
+
 def _lora_config(spec: LoraSpec):
     from peft import LoraConfig
 
@@ -82,6 +102,7 @@ def train_sft(base_path: str, rows: list[dict], adapter_dir: Path, merged_dir: P
     from datasets import Dataset
     from trl import SFTConfig, SFTTrainer
 
+    check_environment()
     if not rows:
         raise ValueError("SFT dataset is empty — check probe labels / build settings")
     ds = Dataset.from_list([{"prompt": r["prompt"], "completion": r["completion"]} for r in rows])
@@ -98,6 +119,7 @@ def train_dpo(sft_path: str, rows: list[dict], adapter_dir: Path, merged_dir: Pa
     from datasets import Dataset
     from trl import DPOConfig, DPOTrainer
 
+    check_environment()
     if not rows:
         raise ValueError("DPO dataset is empty — check probe labels / build settings")
     ds = Dataset.from_list([{"prompt": r["prompt"], "chosen": r["chosen"], "rejected": r["rejected"]}
