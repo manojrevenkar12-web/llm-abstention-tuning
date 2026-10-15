@@ -1,0 +1,60 @@
+# Run 2 — identical to configs/qwen2.5-1.5b.yaml except for the two changes below, each motivated by a
+# diagnosis of run 1 (results/qwen2.5-1.5b/REPORT.md). Release gates are unchanged.
+#
+# Run 1 diagnosis
+#   * Over-abstention: refused 44.7% of questions the base model reliably knows (gate: <= 15%).
+#     Cause: 63% of SFT targets were "I don't know." (1577 unknown vs 943 known), so SFT learned a strong
+#     prior to abstain — over-abstention was already 41.6% after SFT, before DPO.
+#   * DPO barely trained: loss 0.693 -> ~0.67, reward accuracy ~0.65. Cause: lr 5e-6 is a full-fine-tuning
+#     DPO learning rate; LoRA adapters typically need ~10x more.
+#
+# Changes
+#   1. build.max_unknown_ratio: null -> 1.0     (balance SFT: as many "I don't know" targets as answers)
+#   2. train.dpo.learning_rate: 5e-6 -> 5e-5    (LoRA-appropriate DPO learning rate)
+#
+# Reuses run 1's prepare + probe outputs (same base model, same questions): see the notebook's run-2 cell.
+run_name: qwen2.5-1.5b-v2
+output_dir: runs
+seed: 42
+
+model:
+  base: Qwen/Qwen2.5-1.5B-Instruct
+  precision: auto
+
+data:
+  train:   { name: triviaqa_train, source: triviaqa, split: train, limit: 6000 }
+  eval:
+    - { name: triviaqa, source: triviaqa, split: validation, limit: 1000 }
+    - { name: popqa,    source: popqa,    split: test,       limit: 1000 }
+    - { name: nq_open,  source: nq_open,  split: validation, limit: 1000 }
+  in_distribution: triviaqa
+
+generation:
+  batch_size: 64
+  max_new_tokens: 24
+
+probe:
+  num_samples: 8
+  temperature: 0.7
+  top_p: 0.95
+  known_threshold: 0.6
+  unknown_threshold: 0.0
+
+build:
+  dpo_fraction: 0.5
+  partial_policy_sft: skip
+  max_unknown_ratio: 1.0          # CHANGED (run 1: null)
+  known_rejects_abstain: true
+
+train:
+  lora: { r: 16, alpha: 32, dropout: 0.05, target_modules: all-linear }
+  sft:  { epochs: 2, learning_rate: 1.0e-4, batch_size: 16, grad_accum: 1, max_length: 256, warmup_ratio: 0.05 }
+  dpo:  { epochs: 1, learning_rate: 5.0e-5, beta: 0.1, batch_size: 8, grad_accum: 2, max_length: 256, warmup_ratio: 0.1 }  # CHANGED lr (run 1: 5e-6)
+
+eval:
+  systems: [base, base_prompted, sft, sft_dpo]
+  probe_samples: 5
+  ece_bins: 10
+  bootstrap: 1000
+  hallucination_penalty: 1.0
+  target_precision: 0.9

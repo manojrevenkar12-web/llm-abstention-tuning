@@ -60,10 +60,15 @@ def _generator(cfg: RunConfig, model_path: str):
 # --------------------------------------------------------------------------- stages
 
 
-def stage_prepare(cfg: RunConfig) -> None:
+def write_resolved_config(cfg: RunConfig) -> None:
+    """Record the exact configuration next to the run's outputs (done for every stage invoked)."""
     p = Paths(cfg)
     p.root.mkdir(parents=True, exist_ok=True)
     (p.root / "config.resolved.yaml").write_text(yaml.safe_dump(cfg.model_dump(), sort_keys=False))
+
+
+def stage_prepare(cfg: RunConfig) -> None:
+    p = Paths(cfg)
     evals = {spec.name: load_items(spec, cfg.seed) for spec in cfg.data.eval}
     train = disjoint(load_items(cfg.data.train, cfg.seed), evals)
     write_jsonl(p.data / "train.jsonl", (it.to_dict() for it in train))

@@ -1,0 +1,79 @@
+run_name: qwen2.5-1.5b
+output_dir: runs
+seed: 42
+model:
+  base: Qwen/Qwen2.5-1.5B-Instruct
+  precision: auto
+  trust_remote_code: false
+data:
+  train:
+    name: triviaqa_train
+    source: triviaqa
+    split: train
+    path: null
+    limit: 6000
+  eval:
+  - name: triviaqa
+    source: triviaqa
+    split: validation
+    path: null
+    limit: 1000
+  - name: popqa
+    source: popqa
+    split: test
+    path: null
+    limit: 1000
+  - name: nq_open
+    source: nq_open
+    split: validation
+    path: null
+    limit: 1000
+  in_distribution: triviaqa
+generation:
+  batch_size: 64
+  max_new_tokens: 24
+probe:
+  num_samples: 8
+  temperature: 0.7
+  top_p: 0.95
+  known_threshold: 0.6
+  unknown_threshold: 0.0
+build:
+  dpo_fraction: 0.5
+  partial_policy_sft: skip
+  max_unknown_ratio: null
+  known_rejects_abstain: true
+train:
+  lora:
+    r: 16
+    alpha: 32
+    dropout: 0.05
+    target_modules: all-linear
+  sft:
+    epochs: 2.0
+    learning_rate: 0.0001
+    batch_size: 16
+    grad_accum: 1
+    max_length: 256
+    warmup_ratio: 0.05
+    gradient_checkpointing: false
+  dpo:
+    epochs: 1.0
+    learning_rate: 5.0e-06
+    beta: 0.1
+    batch_size: 8
+    grad_accum: 2
+    max_length: 256
+    warmup_ratio: 0.1
+    gradient_checkpointing: false
+eval:
+  systems:
+  - base
+  - base_prompted
+  - sft
+  - sft_dpo
+  probe_samples: 5
+  ece_bins: 10
+  bootstrap: 1000
+  hallucination_penalty: 1.0
+  target_precision: 0.9

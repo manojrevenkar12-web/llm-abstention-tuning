@@ -22,6 +22,7 @@ from .pipeline import (
     stage_probe,
     stage_report,
     stage_sft,
+    write_resolved_config,
 )
 
 GATES_FAILED = 3  # distinct from Python's exit code 1 for an uncaught exception
@@ -37,6 +38,7 @@ def main(argv: list[str] | None = None) -> int:
 
     logging.basicConfig(level=logging.INFO, format="%(asctime)s %(levelname)s %(name)s: %(message)s")
     cfg = load_config(args.config)
+    write_resolved_config(cfg)
 
     runners = {
         "prepare": lambda: stage_prepare(cfg),

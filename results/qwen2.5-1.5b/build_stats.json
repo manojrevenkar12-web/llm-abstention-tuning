@@ -1,0 +1,21 @@
+{
+  "probed_questions": 5998,
+  "probe_labels": {
+    "known": 1885,
+    "partial": 958,
+    "unknown": 3155
+  },
+  "base_greedy_accuracy_on_train": 0.3564521507169056,
+  "sft_examples": 2520,
+  "sft_by_label": {
+    "known": 943,
+    "unknown": 1577
+  },
+  "dpo_pairs": 3257,
+  "dpo_by_type": {
+    "known:answer>abstain": 942,
+    "known:answer>wrong": 258,
+    "partial:answer>wrong": 479,
+    "unknown:abstain>wrong": 1578
+  }
+}

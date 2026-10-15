@@ -54,7 +54,7 @@ def test_jsonl_loader_and_disjoint():
 
 # ---------------------------------------------------------------- config
 
-@pytest.mark.parametrize("name", ["qwen2.5-1.5b.yaml", "qwen2.5-1.5b-quick.yaml", "smoke.yaml"])
+@pytest.mark.parametrize("name", ["qwen2.5-1.5b.yaml", "qwen2.5-1.5b-v2.yaml", "qwen2.5-1.5b-quick.yaml", "smoke.yaml"])
 def test_shipped_configs_validate(name):
     cfg = load_config(ROOT / "configs" / name)
     assert cfg.data.in_distribution in [d.name for d in cfg.data.eval]

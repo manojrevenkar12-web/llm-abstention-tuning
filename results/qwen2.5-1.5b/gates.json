@@ -1,0 +1,90 @@
+[
+  {
+    "name": "SFT+DPO cuts in-distribution hallucination by >= 30%",
+    "dataset": "triviaqa",
+    "value": 0.059,
+    "reference": 0.668,
+    "threshold": 0.3,
+    "kind": "relative_reduction",
+    "severity": "block",
+    "passed": true,
+    "detail": "reduction 91.2% (from 0.6680 to 0.0590) >= 30%"
+  },
+  {
+    "name": "Accuracy drops by at most 5 points",
+    "dataset": "triviaqa",
+    "value": 0.171,
+    "reference": 0.332,
+    "threshold": 0.05,
+    "kind": "max_drop",
+    "severity": "block",
+    "passed": false,
+    "detail": "drop +0.1610 (from 0.3320 to 0.1710) <= 0.05"
+  },
+  {
+    "name": "Refuses at most 15% of questions the base model reliably knows",
+    "dataset": "triviaqa",
+    "value": 0.447098976109215,
+    "reference": null,
+    "threshold": 0.15,
+    "kind": "max",
+    "severity": "block",
+    "passed": false,
+    "detail": "0.4471 <= 0.15"
+  },
+  {
+    "name": "Hallucination reduction transfers out of distribution (>= 15%)",
+    "dataset": "popqa",
+    "value": 0.024,
+    "reference": 0.864,
+    "threshold": 0.15,
+    "kind": "relative_reduction",
+    "severity": "warn",
+    "passed": true,
+    "detail": "reduction 97.2% (from 0.8640 to 0.0240) >= 15%"
+  },
+  {
+    "name": "Hallucination reduction transfers out of distribution (>= 15%)",
+    "dataset": "nq_open",
+    "value": 0.07,
+    "reference": 0.854,
+    "threshold": 0.15,
+    "kind": "relative_reduction",
+    "severity": "warn",
+    "passed": true,
+    "detail": "reduction 91.8% (from 0.8540 to 0.0700) >= 15%"
+  },
+  {
+    "name": "Beats a confidence threshold on the base model at matched coverage",
+    "dataset": "triviaqa",
+    "value": 0.7434782608695653,
+    "reference": 0.7,
+    "threshold": 0.0,
+    "kind": "min_delta",
+    "severity": "warn",
+    "passed": true,
+    "detail": "delta +0.0435 (0.7435 vs 0.7000) >= 0.0"
+  },
+  {
+    "name": "Beats prompting the base model to abstain (net score)",
+    "dataset": "triviaqa",
+    "value": 0.11200000000000002,
+    "reference": -0.331,
+    "threshold": 0.0,
+    "kind": "min_delta",
+    "severity": "warn",
+    "passed": true,
+    "detail": "delta +0.4430 (0.1120 vs -0.3310) >= 0.0"
+  },
+  {
+    "name": "DPO adds value over SFT alone (net score)",
+    "dataset": "triviaqa",
+    "value": 0.11200000000000002,
+    "reference": 0.09899999999999999,
+    "threshold": 0.0,
+    "kind": "min_delta",
+    "severity": "warn",
+    "passed": true,
+    "detail": "delta +0.0130 (0.1120 vs 0.0990) >= 0.0"
+  }
+]
